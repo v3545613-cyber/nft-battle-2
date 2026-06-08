@@ -212,7 +212,7 @@
     </div>
 
     <script>
-                let balance = 100.00;
+        let balance = 100.00;
         let lcoins = 0;
         let maxBalance = 100.00;
         let maxNftPrice = 0;
@@ -221,7 +221,7 @@
         let clickUpgradeCost = 150;
         let isSpinning = false;
 
-        // Системная база 5 видов майнинг-ферм
+        // База 5 видов майнинг-ферм
         const farmsConfig = [
             { id: 'weak', name: 'Слабая майнинг-ферма', cost: 500, rpm: 10, count: 0 },
             { id: 'medium', name: 'Средняя майнинг-ферма', cost: 5000, rpm: 100, count: 0 },
@@ -230,69 +230,66 @@
             { id: 'quantum', name: 'Квантовая крипто-станция', cost: 50000000, rpm: 8000000, count: 0 }
         ];
 
-        // Модифицированная база для генерации ровно 600 уникальных NFT
-        const nftEmojis = ["❤️", "💖", "🐸", "🦎", "🦁", "🐵", "🦍", "🐱", "🐶", "🦊", "👑", "💎", "👾", "🤖", "👽", "🦄", "🐼", "🦉", "🧙", "🎃", "🌟", "🔥", "🔮", "🧿"];
-        const nftTypes = ["Сердечко", "Пепе", "Криптопанк", "Ape", "Пришелец", "Робот", "Киберколлаж", "Лорд NFT", "Маск", "Бутерин", "Пиксель", "Мани-Бэг", "Кибер-Кот", "Доги", "Фокс", "Визард", "Панда", "Гоблин", "Призрак", "Мутант", "Оракул", "Аватар", "Дракон", "Тайтан", "Спектр"];
-        const nftQualities = ["Обычный", "Редкий", "Эпический", "Мифический", "Тайный", "Древний", "Звездный", "Квантовый", "Космический", "Бриллиантовый", "Неоновый", "Цифровой", "Глобальный", "Абсолютный", "Золотой", "Платиновый", "Призрачный", "Инфернальный", "Бессмертный", "Легендарный", "Высший", "Архаичный", "Матёрый", "Священный", "Вечный"];
+        // Массивы скрещивания для генерации ровно 1000 NFT
+        const nftEmojis = ["❤️", "💖", "🐸", "🦎", "🦁", "🐵", "🦍", "🐱", "🐶", "🦊", "👑", "💎", "👾", "🤖", "👽", "🦄", "🐼", "🦉", "🧙", "🎃", "🌟", "🔥", "🔮", "🧿", "🌀"];
+        const nftTypes = ["Сердечко", "Пепе", "Криптопанк", "Ape", "Пришелец", "Робот", "Киберколлаж", "Лорд NFT", "Маск", "Бутерин", "Пиксель", "Мани-Бэг", "Кибер-Кот", "Доги", "Фокс", "Визард", "Панда", "Гоблин", "Призрак", "Мутант", "Оракул", "Аватар", "Дракон", "Тайтан", "Спектр", "Артефакт", "Шард", "Дроид", "Клон", "Фантом", "Неон-Рэйдер", "Астронавт", "Хакер", "Марсианин", "Акула", "Самурай", "Феникс", "Сфинкс", "Грифон", "Голем"];
+        const nftQualities = ["Обычный", "Редкий", "Эпический", "Мифический", "Тайный", "Древний", "Звездный", "Квантовый", "Космический", "Бриллиантовый", "Неоновый", "Цифровой", "Глобальный", "Абсолютный", "Золотой", "Платиновый", "Призрачный", "Инфернальный", "Бессмертный", "Легендарный", "Высший", "Архаичный", "Матёрый", "Священный", "Вечный", "Экзотический", "Ультра-Редкий", "Элитный", "Секретный", "Реликвия", "Шедевр", "Божественный", "Мистический"];
 
         const nftDatabase = [];
         let userInventory = [];
-        let insuranceInventory = []; // Хранилище заложенных вещей
+        let insuranceInventory = []; 
 
-        // ГЕНЕРАТОР 600 NFT: нелинейный расчет стоимости от 1₽ до 500 000 000₽
+        // ГЕНЕРАТОР 1000 NFT до 2 млрд рублей (исправлен)
         function generateNftDatabase() {
             let id = 0;
-            // 24 эмодзи * 25 типов = 600 уникальных карточек
             for (let i = 0; i < nftEmojis.length; i++) {
                 for (let j = 0; j < nftTypes.length; j++) {
                     let qualIdx = Math.floor((i + j) / 2);
                     let name = `${nftQualities[qualIdx]} ${nftTypes[j]}`;
-                    
-                    // Повышенная экспонента (степень 8) сильно занижает шансы на дорогой лут, делая его редким
-                    let progress = id / 599; 
-                    let price = Math.round(1 + Math.pow(progress, 8) * 499999999);
-
+                    let progress = id / 999; 
+                    let price = Math.round(1 + Math.pow(progress, 8) * 1999999999);
                     nftDatabase.push({ id: id, name: name, emoji: nftEmojis[i], price: price });
                     id++;
                 }
             }
             nftDatabase.sort((a, b) => a.price - b.price);
         }
-
-        // Конфигурация 60 обычных кейсов и 5 лаки кейсов (Всего 65)
-        const regularCases = [];
+                const regularCases = [];
         const luckyCases = [];
-        const luckyTimers = [0, 0, 0, 0, 0]; // Отсчет кулдауна для лаки кейсов
+        
+        // Массивы лимитов и индивидуальных таймеров склада Лаки-Кейсов
+        const luckyTimers = [0, 0, 0, 0, 0];
+        const luckyStocks = [5, 5, 5, 5, 5];
+        let globalRefreshTimer = 300; 
 
+        // Инициализация всех 85 кейсов игры
         function initAllCases() {
-            const caseNames = ["Бомж", "Карманный", "Стартовый", "Обычный", "Бронзовый", "Медный", "Железный", "Серебряный", "Стальной", "Золотой", "Платиновый", "Рубиновый", "Сапфировый", "Изумрудный", "Алмазный", "Мастер", "Элитный", "Кибернетический", "Космический", "Галактический", "Абсолютный", "Властелин", "Магнат", "Олигарх", "NFT Infinity", "Премиум", "Ультра", "VIP", "Вайпер", "Призрачный", "Теневой", "Тайный", "Мифический", "Древний", "Титановый", "Хромированный", "Неоновый", "Цифровой", "Глобальный", "Квантовый", "Звездный", "Солнечный", "Лунный", "Астральный", "Эфирный", "Плазменный", "Магматический", "Имперский", "Королевский", "Божественный", "Бессмертный", "Вечный", "Высший", "Вулканический", "Метеоритный", "Пророческий", "Сверхновый", "Сингулярный", "Андромеда", "Лорд NFT"];
+            const caseNames = ["Бомж", "Карманный", "Стартовый", "Обычный", "Бронзовый", "Медный", "Железный", "Серебряный", "Стальной", "Золотой", "Платиновый", "Рубиновый", "Сапфировый", "Изумрудный", "Алмазный", "Мастер", "Элитный", "Кибернетический", "Космический", "Галактический", "Абсолютный", "Властелин", "Магнат", "Олигарх", "NFT Infinity", "Премиум", "Ультра", "VIP", "Вайпер", "Призрачный", "Теневой", "Тайный", "Мифический", "Древний", "Титановый", "Хромированный", "Неоновый", "Цифровой", "Глобальный", "Квантовый", "Звездный", "Солнечный", "Лунный", "Астральный", "Эфирный", "Плазменный", "Магматический", "Имперский", "Королевский", "Божественный", "Бессмертный", "Вечный", "Высший", "Вулканический", "Метеоритный", "Пророческий", "Сверхновый", "Сингулярный", "Андромеда", "Лорд NFT", "Марсианский", "Атлантида", "Орион", "Центурион", "Спартанец", "Гладиатор", "Викинг", "Шериф", "Детектив", "Агент", "Принц", "Халиф", "Султан", "Император", "Аватар-Кейс", "Оракул-Кейс", "Демиург", "Священный Грааль", "Абсолютная Пустота", "Создатель Вселенной"];
             
-            // 1. Создаем 60 обычных кейсов (от 10₽ до 500 000₽)
-            for (let i = 0; i < 60; i++) {
-                let prog = i / 59;
+            // 1. Создаем 80 обычных кейсов
+            for (let i = 0; i < 80; i++) {
+                let prog = i / 79;
                 let price = Math.round(10 + Math.pow(prog, 4.5) * 499990);
-                // Границы индексов сужают пул, чтобы в дешевых падал только мусор
-                let minIdx = Math.floor(prog * 350); 
-                let maxIdx = Math.min(599, Math.floor(15 + prog * 584));
-
+                let minIdx = Math.floor(prog * 600); 
+                let maxIdx = Math.min(999, Math.floor(25 + prog * 974));
                 regularCases.push({ id: i, name: `Кейс: ${caseNames[i]}`, icon: "📦", price: price, minIdx: minIdx, maxIdx: maxIdx });
             }
 
-            // 2. Создаем 5 Лаки-кейсов за L-Coins (500, 10к, 100к, 1кк, 10кк)
+            // 2. Создаем 5 Лаки-кейсов с точной стоимостью в L-Coins
             const luckyCosts = [500, 10000, 100000, 1000000, 10000000];
             const luckyNames = ["Лаки-Старт", "Лаки-Редкий", "Лаки-Эпик", "Лаки-Мифик", "Лаки-Джекпот"];
+            
             for (let i = 0; i < 5; i++) {
                 let prog = i / 4;
-                // В Лаки-кейсах минимальная планка дропа намного выше (Повышенный шанс на топ лут)
-                let minIdx = Math.floor(prog * 450); 
-                let maxIdx = 599;
-
+                let minIdx = Math.floor(prog * 750); 
+                let maxIdx = 999;
                 luckyCases.push({ id: i, name: luckyNames[i], icon: "🍀", price: luckyCosts[i], minIdx: minIdx, maxIdx: maxIdx });
             }
         }
-                // Отрисовка обычных кейсов (60 штук)
+                // Отрисовка обычных кейсов
         function drawRegularCases() {
             const container = document.getElementById('cases-container');
+            if (!container) return;
             container.innerHTML = '';
             regularCases.forEach(c => {
                 const card = document.createElement('div');
@@ -311,38 +308,13 @@
             });
         }
 
-        // Отрисовка Лаки Кейсов (5 штук с таймерами кулдауна)
-        function drawLuckyCases() {
-            const container = document.getElementById('lucky-cases-container');
-            container.innerHTML = '';
-            luckyCases.forEach(c => {
-                const card = document.createElement('div');
-                card.className = 'case-card';
-                
-                let isReady = luckyTimers[c.id] === 0;
-                let timerText = isReady ? "" : `Перезарядка: ${luckyTimers[c.id]} сек.`;
-                
-                card.innerHTML = `
-                    <div>
-                        <div class="case-title">${c.name}</div>
-                        <div class="case-icon">${c.icon}</div>
-                    </div>
-                    <div>
-                        <div class="case-timer" id="timer-label-${c.id}">${timerText}</div>
-                        <div class="case-price lcoin">${c.price.toLocaleString('ru-RU')} 🪙</div>
-                        <button class="case-btn" id="lucky-btn-${c.id}" ${isReady ? "" : "disabled"} style="background: #ff9800;" onclick="openLuckyCase(${c.id})">Открыть</button>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        // Обменник валюты: 10 000 рублей на 1 000 000 L-Coins
+        // Обменник валюты
         function exchangeMoneyToLCoins() {
             if (balance >= 10000) {
                 balance -= 10000;
                 lcoins += 1000000;
                 updateUI();
+                saveGame();
                 alert("Успешный обмен! Вы получили 1 000 000 L-Coins.");
             } else {
                 alert("Недостаточно обычных рублей для обмена! Требуется минимум 10 000 ₽.");
@@ -353,28 +325,25 @@
         function upgradeClicker() {
             if (balance >= clickUpgradeCost) {
                 balance -= clickUpgradeCost;
-                
-                // Первое улучшение даёт +0.50₽ (сводит клик к 1.00₽), последующие — честные +1.00₽
                 if (clickPower === 0.50) {
                     clickPower = 1.00;
                 } else {
                     clickPower += 1.00;
                 }
-                
-                // Стоимость прокачки увеличивается
                 clickUpgradeCost = Math.round(clickUpgradeCost * 1.8);
                 
                 document.getElementById('click-power-val').innerText = clickPower.toFixed(2);
                 document.getElementById('click-upgrade-cost').innerText = clickUpgradeCost;
                 updateUI();
+                saveGame();
             } else {
                 alert("Недостаточно денег для прокачки кликера!");
             }
         }
-
-        // Отрисовка списка 5 майнинг-ферм
+                // Отрисовка списка 5 майнинг-ферм
         function drawFarmsList() {
             const container = document.getElementById('farms-list-container');
+            if (!container) return;
             container.innerHTML = '';
             farmsConfig.forEach((f, idx) => {
                 const card = document.createElement('div');
@@ -398,38 +367,42 @@
                 f.count++;
                 document.getElementById(`farm-count-${f.id}`).innerText = f.count;
                 updateUI();
+                saveGame();
             } else {
                 alert("Недостаточно денег для покупки этой фермы!");
             }
         }
 
-        // Автодоход (работает раз в секунду)
+        // Автодоход и ежесекундные таймеры склада Лаки-Кейсов
         function processMining() {
             let incomePerSec = 0;
-            farmsConfig.forEach(f => {
-                incomePerSec += (f.rpm / 60) * f.count;
-            });
-
+            farmsConfig.forEach(f => { incomePerSec += (f.rpm / 60) * f.count; });
             balance += incomePerSec;
-            let incomePerMin = incomePerSec * 60;
-            document.getElementById('mining-speed').innerText = `Автодоход: +${incomePerMin.toLocaleString('ru-RU', {maximumFractionDigits: 2})} ₽/мин`;
             
-            // Заодно обновляем секундные таймеры Лаки-Кейсов
+            let incomePerMin = incomePerSec * 60;
+            const msEl = document.getElementById('mining-speed');
+            if (msEl) msEl.innerText = `Автодоход: +${incomePerMin.toLocaleString('ru-RU', {maximumFractionDigits: 2})} ₽/мин`;
+            
+            if (globalRefreshTimer > 0) {
+                globalRefreshTimer--;
+                if (globalRefreshTimer === 0) {
+                    for (let i = 0; i < 5; i++) { if (luckyStocks[i] > 0) luckyStocks[i] = 5; }
+                    globalRefreshTimer = 300;
+                }
+            }
+
             for (let i = 0; i < 5; i++) {
                 if (luckyTimers[i] > 0) {
                     luckyTimers[i]--;
-                    const label = document.getElementById(`timer-label-${i}`);
-                    const btn = document.getElementById(`lucky-btn-${i}`);
-                    if (label) label.innerText = `Перезарядка: ${luckyTimers[i]} сек.`;
-                    if (luckyTimers[i] === 0) {
-                        if (label) label.innerText = "";
-                        if (btn) btn.disabled = false;
-                    }
+                    if (luckyTimers[i] === 0) luckyStocks[i] = 5;
                 }
             }
+
+            if (document.getElementById('lucky-screen').classList.contains('active')) drawLuckyCases();
             updateUI();
+            saveGame();
         }
-                // Вкладки навигации
+
         function switchTab(tabId) {
             document.querySelectorAll('.game-screen').forEach(s => s.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -438,29 +411,24 @@
             const btnIdx = ['clicker', 'cases', 'lucky', 'mining', 'profile'].indexOf(tabId);
             document.querySelectorAll('.tab-btn')[btnIdx].classList.add('active');
 
-            if (tabId === 'profile') { drawInventory(); drawInsurance(); }
+            if (tabId === 'profile') { drawInventory(); drawInsurance(); drawSaveRestoreUI(); }
             if (tabId === 'lucky') drawLuckyCases();
         }
-
-        // Общая функция прокрутки анимации рулетки
+                // Функция анимации рулетки
         function animateRoulette(caseName, minIdx, maxIdx, onFinish) {
             isSpinning = true;
             updateUI();
-
             document.getElementById('roulette-case-name').innerText = caseName;
             document.getElementById('win-title').innerText = "Крутим рулетку...";
             document.getElementById('win-price').innerText = "";
             document.getElementById('close-roulette').style.display = "none";
             document.getElementById('roulette-modal').style.display = "flex";
 
-            let ticks = 0;
-            let droppedNft = null;
-
+            let ticks = 0, droppedNft = null;
             const interval = setInterval(() => {
                 let range = maxIdx - minIdx + 1;
                 let randIdx = minIdx + Math.floor(Math.random() * range);
                 droppedNft = nftDatabase[randIdx];
-
                 document.getElementById('roulette-anim').innerText = droppedNft.emoji;
                 ticks++;
 
@@ -469,10 +437,10 @@
                     document.getElementById('win-title').innerText = `Выпало: ${droppedNft.name}`;
                     document.getElementById('win-price').innerText = `Стоимость: ${droppedNft.price.toLocaleString('ru-RU')} ₽`;
                     document.getElementById('close-roulette').style.display = "inline-block";
-                    
                     onFinish(droppedNft);
                     isSpinning = false;
                     updateUI();
+                    saveGame();
                 }
             }, 120);
         }
@@ -482,34 +450,30 @@
             if (isSpinning) return;
             const c = regularCases[id];
             if (balance < c.price) { alert("Недостаточно рублей!"); return; }
-
             balance -= c.price;
             animateRoulette(c.name, c.minIdx, c.maxIdx, (nft) => {
-                userInventory.push({ ...nft, instanceId: Date.now() + Math.random() });
+                userInventory.push({ id: nft.id, name: nft.name, emoji: nft.emoji, price: nft.price, instanceId: Date.now() + Math.random() });
                 checkRecords(nft);
             });
         }
 
-        // Открытие Лаки-кейса (за L-Coins с таймером в 5 минут / 300 секунд)
+        // Открытие Лаки-кейса (за L-Coins) с лимитом партии
         function openLuckyCase(id) {
             if (isSpinning) return;
             const c = luckyCases[id];
+            if (luckyStocks[id] <= 0) { alert(`Этот кейс распродан! Новая партия через: ${luckyTimers[id]} сек.`); return; }
             if (lcoins < c.price) { alert("Недостаточно L-Coins! Воспользуйтесь обменником."); return; }
-            if (luckyTimers[id] > 0) return;
 
             lcoins -= c.price;
-            luckyTimers[id] = 300; // Кулдаун 5 минут
-            
+            luckyStocks[id]--;
+            if (luckyStocks[id] === 0) luckyTimers[id] = 1200;
+
             animateRoulette(`🍀 ${c.name}`, c.minIdx, c.maxIdx, (nft) => {
-                userInventory.push({ ...nft, instanceId: Date.now() + Math.random() });
+                userInventory.push({ id: nft.id, name: nft.name, emoji: nft.emoji, price: nft.price, instanceId: Date.now() + Math.random() });
                 checkRecords(nft);
             });
         }
-
-        function closeModal() {
-            document.getElementById('roulette-modal').style.display = "none";
-        }
-
+                function closeModal() { document.getElementById('roulette-modal').style.display = "none"; }
         function checkRecords(nft) {
             if (nft.price > maxNftPrice) {
                 maxNftPrice = nft.price;
@@ -518,10 +482,7 @@
         }
 
         // Клик по монете
-        document.getElementById('coin-click').onclick = () => {
-            balance += clickPower;
-            updateUI();
-        };
+        document.getElementById('coin-click').onclick = () => { balance += clickPower; updateUI(); };
 
         function updateUI() {
             document.getElementById('user-balance').innerText = balance.toLocaleString('ru-RU', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -537,87 +498,144 @@
             balance += price;
             drawInventory();
             updateUI();
+            saveGame();
         }
 
-        // Страховка (Закладка): перенос из инвентаря в Сейф
+        // Страховка (Закладка)
         function moveToInsurance(instanceId) {
             const itemIdx = userInventory.findIndex(item => item.instanceId === instanceId);
             if (itemIdx > -1) {
                 insuranceInventory.push(userInventory[itemIdx]);
                 userInventory.splice(itemIdx, 1);
-                drawInventory();
-                drawInsurance();
+                drawInventory(); drawInsurance(); saveGame();
             }
         }
 
-        // Возврат из Страховки обратно в активный инвентарь
+        // Возврат из Страховки
         function returnFromInsurance(instanceId) {
             const itemIdx = insuranceInventory.findIndex(item => item.instanceId === instanceId);
             if (itemIdx > -1) {
                 userInventory.push(insuranceInventory[itemIdx]);
                 insuranceInventory.splice(itemIdx, 1);
-                drawInventory();
-                drawInsurance();
+                drawInventory(); drawInsurance(); saveGame();
             }
         }
 
         // Отрисовка основного инвентаря
         function drawInventory() {
             const grid = document.getElementById('inventory-grid');
-            grid.innerHTML = '';
+            if (!grid) return; grid.innerHTML = '';
             if (userInventory.length === 0) { grid.innerHTML = '<div style="color:#8b949e; font-size:12px;">Тут пока пусто...</div>'; return; }
             userInventory.sort((a, b) => b.price - a.price);
-
             userInventory.forEach(item => {
                 const box = document.createElement('div');
                 box.className = 'nft-item';
                 box.innerHTML = `
-                    <div>
-                        <div class="nft-emoji">${item.emoji}</div>
-                        <div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
-                        <div style="color:#58a6ff; margin:2px 0; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div>
-                    </div>
-                    <div class="nft-btns">
-                        <button class="case-btn" style="background:#d32f2f; padding:3px; font-size:10px;" onclick="sellNft(${item.instanceId}, ${item.price})">Продать</button>
-                        <button class="case-btn" style="background:#ff9800; padding:3px; font-size:10px;" onclick="moveToInsurance(${item.instanceId})">Заложить</button>
-                    </div>
+                    <div><div class="nft-emoji">${item.emoji}</div><div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div><div style="color:#58a6ff; margin:2px 0; font-weight:bold;">${item.price.toLocaleString('ru-RU')} ₽</div></div>
+                    <div class="nft-btns"><button class="case-btn" style="background:#d32f2f; padding:3px; font-size:10px;" onclick="sellNft(${item.instanceId}, ${item.price})">Продать</button>
+                    <button class="case-btn" style="background:#ff9800; padding:3px; font-size:10px;" onclick="moveToInsurance(${item.instanceId})">Заложить</button></div>
                 `;
                 grid.appendChild(box);
             });
         }
-
-        // Отрисовка застрахованного Сейфа
+                // Отрисовка застрахованного Сейфа
         function drawInsurance() {
             const grid = document.getElementById('insurance-grid');
-            grid.innerHTML = '';
+            if (!grid) return; grid.innerHTML = '';
             if (insuranceInventory.length === 0) { grid.innerHTML = '<div style="color:#8b949e; font-size:12px;">В сейфе нет заложенных NFT...</div>'; return; }
             insuranceInventory.sort((a, b) => b.price - a.price);
-
             insuranceInventory.forEach(item => {
                 const box = document.createElement('div');
-                box.className = 'nft-item';
-                box.style.borderColor = '#ff9800';
+                box.className = 'nft-item'; box.style.borderColor = '#ff9800';
                 box.innerHTML = `
-                    <div>
-                        <div class="nft-emoji">${item.emoji}</div>
-                        <div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div>
-                        <div style="color:#ff9800; margin:2px 0; font-weight:bold;">🔒 Застрахован</div>
-                    </div>
-                    <div class="nft-btns">
-                        <button class="case-btn" style="background:#238636; padding:4px; font-size:10px;" onclick="returnFromInsurance(${item.instanceId})">Вернуть</button>
-                    </div>
+                    <div><div class="nft-emoji">${item.emoji}</div><div style="font-weight:bold; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</div><div style="color:#ff9800; margin:2px 0; font-weight:bold;">🔒 Застрахован</div></div>
+                    <div class="nft-btns"><button class="case-btn" style="background:#238636; padding:4px; font-size:10px;" onclick="returnFromInsurance(${item.instanceId})">Вернуть</button></div>
                 `;
                 grid.appendChild(box);
             });
         }
 
-        // Инициализация
+        // Отрисовка UI кодов переноса прогресса
+        function drawSaveRestoreUI() {
+            const layout = document.getElementById('profile-layout');
+            if (!layout || document.getElementById('code-system-box')) return;
+            const codeBox = document.createElement('div');
+            codeBox.id = 'code-system-box'; codeBox.className = 'inventory-section'; codeBox.style.borderColor = '#58a6ff';
+            codeBox.innerHTML = `
+                <div style="font-weight: bold; color: #58a6ff; margin-bottom: 5px;">🔑 Перенос прогресса (Текстовые коды):</div>
+                <div style="font-size: 11px; color: #8b949e; margin-bottom: 10px;">Скопируйте код сохранения для переноса на другой ПК или введите его для восстановления.</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; align-items: center;">
+                    <button class="case-btn" style="background: #1f6feb;" onclick="exportSaveCode()">Скопировать код сохранения</button>
+                    <input type="text" id="import-code-input" placeholder="Вставьте ваш код сюда..." style="background: #21262d; border: 1px solid #30363d; color: #fff; padding: 7px; border-radius: 4px; flex-grow: 1; min-width: 150px; font-size: 12px;">
+                    <button class="case-btn" style="background: #238636;" onclick="importSaveCode()">Ввести код</button>
+                </div>
+            `;
+            layout.insertBefore(codeBox, layout.firstChild);
+        }
+
+        // --- ЛОГИКА АВТОСОХРАНЕНИЙ И ТРАНСФЕРА ---
+        function saveGame() {
+            const saveData = { balance, lcoins, maxBalance, maxNftPrice, maxNftName, clickPower, clickUpgradeCost, farms: farmsConfig.map(f => f.count), inventory: userInventory, insurance: insuranceInventory, luckyStocks, luckyTimers, globalRefreshTimer };
+            localStorage.setItem('nft_battle_save_v2', JSON.stringify(saveData));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('nft_battle_save_v2'); if (!saved) return;
+            try { applyLoadedData(JSON.parse(saved)); } catch(e) { console.error("Ошибка автозагрузки", e); }
+        }
+
+        function applyLoadedData(data) {
+            if(data.balance !== undefined) balance = data.balance;
+            if(data.lcoins !== undefined) lcoins = data.lcoins;
+            if(data.maxBalance !== undefined) maxBalance = data.maxBalance;
+            if(data.maxNftPrice !== undefined) maxNftPrice = data.maxNftPrice;
+            if(data.maxNftName !== undefined) maxNftName = data.maxNftName;
+            if(data.clickPower !== undefined) clickPower = data.clickPower;
+            if(data.clickUpgradeCost !== undefined) clickUpgradeCost = data.clickUpgradeCost;
+            if(data.farms !== undefined) { data.farms.forEach((count, i) => { if(farmsConfig[i]) farmsConfig[i].count = count; }); }
+            if(data.inventory !== undefined) userInventory = data.inventory;
+            if(data.insurance !== undefined) insuranceInventory = data.insurance;
+            if(data.luckyStocks !== undefined) { for(let i=0; i<5; i++) luckyStocks[i] = data.luckyStocks[i]; }
+            if(data.luckyTimers !== undefined) { for(let i=0; i<5; i++) luckyTimers[i] = data.luckyTimers[i]; }
+            if(data.globalRefreshTimer !== undefined) globalRefreshTimer = data.globalRefreshTimer;
+
+            const cpEl = document.getElementById('click-power-val'); if (cpEl) cpEl.innerText = clickPower.toFixed(2);
+            const cucEl = document.getElementById('click-upgrade-cost'); if (cucEl) cucEl.innerText = clickUpgradeCost;
+            drawFarmsList(); updateUI();
+        }
+
+        function exportSaveCode() {
+            saveGame(); const rawSave = localStorage.getItem('nft_battle_save_v2'); if (!rawSave) return;
+            try {
+                const base64Code = btoa(unescape(encodeURIComponent(rawSave)));
+                navigator.clipboard.writeText(base64Code).then(() => { alert("Шифр-код скопирован!"); }).catch(() => {
+                    const input = document.getElementById('import-code-input');
+                    if (input) { input.value = base64Code; input.select(); alert("Скопируйте код из поля вручную!"); }
+                });
+            } catch(e) { alert("Ошибка сборки кода."); }
+        }
+
+        function importSaveCode() {
+            const input = document.getElementById('import-code-input');
+            if (!input || !input.value.trim()) { alert("Вставьте шифр-код!"); return; }
+            try {
+                const decodedRaw = decodeURIComponent(escape(atob(input.value.trim())));
+                const parsedData = JSON.parse(decodedRaw);
+                if (parsedData && parsedData.balance !== undefined) {
+                    applyLoadedData(parsedData); saveGame(); drawInventory(); drawInsurance(); input.value = ''; alert("Прогресс перенесён!");
+                } else { alert("Неверный формат кода!"); }
+            } catch(e) { alert("Ошибка! Код поврежден."); }
+        }
+
+        // ЗАПУСК ИГРЫ
         generateNftDatabase();
         initAllCases();
         drawRegularCases();
         drawFarmsList();
+        loadGame();
         updateUI();
         setInterval(processMining, 1000);
     </script>
 </body>
 </html>
+
