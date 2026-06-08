@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft Chest Mining Simulator</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background-color: #75a7ff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            user-select: none; overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            height: 100vh;
+        }
+
+        #top-bar {
+            width: 100%; padding: 15px 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            box-sizing: border-box; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(5px);
+            color: white; z-index: 10;
+        }
+        #balance-info { font-size: 20px; font-weight: bold; color: #ffd700; text-shadow: 1px 1px 2px #000; }
+        
+        #inventory { display: flex; gap: 12px; }
+        .slot {
+            width: 55px; height: 55px;
+            background: rgba(30, 30, 30, 0.85);
+            border: 3px solid #555; border-radius: 6px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            font-size: 24px; cursor: pointer; position: relative; transition: 0.2s;
+        }
+        .slot:hover { border-color: #888; background: rgba(50, 50, 50, 0.9); }
+        .slot.selected { border-color: #4cc9cc; box-shadow: 0 0 12px #4cc9cc; }
+        .slot-dur { position: absolute; bottom: 2px; font-size: 10px; color: #aaa; font-weight: bold; }
+
+        #btn-spin {
+            background: #4caf50; border: none; color: white;
+            padding: 12px 24px; font-size: 18px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; box-shadow: 0 4px #2e7d32; transition: 0.1s;
+        }
+        #btn-spin:active { transform: translateY(3px); box-shadow: 0 1px #2e7d32; }
+        #btn-spin:disabled { background: #555; box-shadow: 0 4px #333; cursor: not-allowed; }
+
+        #game-field {
+            display: flex; gap: 40px; margin-top: auto; margin-bottom: auto;
+            align-items: flex-end; justify-content: center; width: 100%; max-width: 1000px;
+        }
+                .chest-column {
+            display: flex; flex-direction: column; align-items: center; width: 70px;
+        }
+
+        .blocks-grid {
+            display: flex; flex-direction: column-reverse; gap: 4px;
+            margin-bottom: 15px;
+        }
+        .block {
+            width: 50px; height: 50px; box-sizing: border-box;
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; color: white; text-shadow: 1px 1px 1px #000;
+            cursor: pointer; position: relative; transition: transform 0.1s;
+        }
+        .block:active { transform: scale(0.95); }
+        .hp-indicator { position: absolute; bottom: 1px; font-size: 9px; color: #ffeb3b; }
+
+        .wood { background: #a16e45; border: 2px solid #5d3a1a; }
+        .brick { background: #b24a36; border: 2px solid #853324; }
+        .stone { background: #737373; border: 2px solid #5c5c5c; }
+        .gold { background: #cca633; border: 2px solid #997a1a; }
+        .diamond { background: #4cc9cc; border: 2px solid #298a8c; }
+        .obsidian { background: #19132b; border: 2px solid #100b1c; box-shadow: inset 0 0 5px #312354; }
+
+        .chest-wrapper { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+        .chest { font-size: 45px; filter: drop-shadow(0px 4px 4px rgba(0,0,0,0.3)); cursor: pointer; transition: 0.2s; }
+        .chest:hover { transform: scale(1.1); }
+        .chest-label {
+            background: rgba(0,0,0,0.7); color: #fff; padding: 2px 8px;
+            border-radius: 4px; font-size: 14px; font-weight: bold; border: 1px solid #555;
+        }
+
+        #free-money-container { position: fixed; bottom: 20px; left: 20px; }
+        #btn-free {
+            background: #ff9800; border: none; color: white; padding: 12px 20px;
+            font-size: 15px; font-weight: bold; border-radius: 5px; cursor: pointer;
+            box-shadow: 0 4px #e65100; transition: 0.1s;
+        }
+        #btn-free:active { transform: translateY(2px); box-shadow: 0 2px #e65100; }
+        #btn-free:disabled { background: #666; box-shadow: 0 4px #444; cursor: not-allowed; }
+    </style>
+</head>
+<body>
+
+    <div id="top-bar">
+        <div id="balance-info">💰 Баланс: <span id="balance-val">100</span> монеток</div>
+        <div id="inventory">
+            <div class="slot" data-idx="0"></div>
+            <div class="slot" data-idx="1"></div>
+            <div class="slot" data-idx="2"></div>
+            <div class="slot" data-idx="3"></div>
+            <div class="slot" data-idx="4"></div>
+        </div>
+        <button id="btn-spin">КРУТИТЬ (20 💰)</button>
+    </div>
+
+    <div id="game-field"></div>
+
+    <div id="free-money-container">
+        <button id="btn-free">Получить +100 монеток</button>
+    </div>
+
+    <script>
+                let balance = 100;
+        let selectedPickaxeIdx = -1;
+        let isSpinning = false;
+
+        const pickaxes = [
+            { type: 'wood', name: 'Деревянная', emoji: '🪵', dmg: 1, maxDur: 15 },
+            { type: 'stone', name: 'Каменная', emoji: '🪨', dmg: 2, maxDur: 20 },
+            { type: 'iron', name: 'Железная', emoji: '⚔️', dmg: 4, maxDur: 25 },
+            { type: 'diamond', name: 'Алмазная', emoji: '💎', dmg: 7, maxDur: 30 },
+            { type: 'netherite', name: 'Незеритовая', emoji: '💜', dmg: 12, maxDur: 40 }
+        ];
+
+        const blockTypes = [
+            { id: 'wood', hp: 3 },
+            { id: 'brick', hp: 6 },
+            { id: 'stone', hp: 10 },
+            { id: 'gold', hp: 16 },
+            { id: 'diamond', hp: 25 },
+            { id: 'obsidian', hp: 45 }
+        ];
+
+        let playerInventory = [null, null, null, null, null];
+
+        const columnsData = Array.from({ length: 5 }, () => ({
+            multiplier: 1.0,
+            brokenCount: 0,
+            blocks: []
+        }));
+
+        const fieldEl = document.getElementById('game-field');
+        const spinBtn = document.getElementById('btn-spin');
+        const freeBtn = document.getElementById('btn-free');
+        const slotEls = document.querySelectorAll('.slot');
+
+        const rewards = [0.5, 1.0, 1.0, 1.5, 1.5];
+
+        function initWorld() {
+            fieldEl.innerHTML = '';
+            columnsData.forEach((col, cIdx) => {
+                col.multiplier = 1.0;
+                col.brokenCount = 0;
+                col.blocks = [];
+
+                for (let i = 0; i < 5; i++) {
+                    let randBlock = blockTypes[Math.floor(Math.random() * blockTypes.length)];
+                    col.blocks.push({ id: randBlock.id, hp: randBlock.hp, maxHp: randBlock.hp });
+                }
+
+                const colEl = document.createElement('div');
+                colEl.className = 'chest-column';
+
+                const gridEl = document.createElement('div');
+                gridEl.className = 'blocks-grid';
+                gridEl.id = `grid-${cIdx}`;
+
+                const chestWrapper = document.createElement('div');
+                chestWrapper.className = 'chest-wrapper';
+                chestWrapper.innerHTML = `
+                    <div class="chest" onclick="clickChest(${cIdx})">🧰</div>
+                    <div class="chest-label" id="label-${cIdx}">X1.0</div>
+                `;
+
+                colEl.appendChild(gridEl);
+                colEl.appendChild(chestWrapper);
+                fieldEl.appendChild(colEl);
+
+                renderBlocksColumn(cIdx);
+            });
+            updateUI();
+        }
+
+        function renderBlocksColumn(cIdx) {
+            const gridEl = document.getElementById(`grid-${cIdx}`);
+            gridEl.innerHTML = '';
+            const col = columnsData[cIdx];
+
+            col.blocks.forEach((b, bIdx) => {
+                const bEl = document.createElement('div');
+                bEl.className = `block ${b.id}`;
+                bEl.innerHTML = `<span class="hp-indicator">${b.hp}/${b.maxHp}</span>`;
+                bEl.onclick = () => hitBlock(cIdx, bIdx);
+                gridEl.appendChild(bEl);
+            });
+        }
+                function hitBlock(cIdx, bIdx) {
+            if (selectedPickaxeIdx === -1 || !playerInventory[selectedPickaxeIdx]) {
+                alert("Сначала выберите кирку в инвентаре сверху!");
+                return;
+            }
+
+            const pick = playerInventory[selectedPickaxeIdx];
+            const col = columnsData[cIdx];
+            const block = col.blocks[bIdx];
+
+            block.hp -= pick.dmg;
+            pick.dur--;
+
+            if (pick.dur <= 0) {
+                playerInventory[selectedPickaxeIdx] = null;
+                selectedPickaxeIdx = -1;
+            }
+
+            if (block.hp <= 0) {
+                col.blocks.splice(bIdx, 1);
+                
+                let bonus = rewards[col.brokenCount] || 1.5;
+                col.multiplier += bonus;
+                col.brokenCount++;
+                
+                document.getElementById(`label-${cIdx}`).innerText = `X${col.multiplier.toFixed(1)}`;
+            }
+
+            renderBlocksColumn(cIdx);
+            updateUI();
+        }
+
+        function clickChest(cIdx) {
+            const col = columnsData[cIdx];
+            if (col.multiplier > 1.0) {
+                let prize = Math.round(10 * col.multiplier);
+                balance += prize;
+                alert(`Вы открыли сундук и забрали ${prize} монеток благодаря множителю X${col.multiplier.toFixed(1)}!`);
+                
+                col.multiplier = 1.0;
+                col.brokenCount = 0;
+                col.blocks = [];
+                for (let i = 0; i < 5; i++) {
+                    let randBlock = blockTypes[Math.floor(Math.random() * blockTypes.length)];
+                    col.blocks.push({ id: randBlock.id, hp: randBlock.hp, maxHp: randBlock.hp });
+                }
+                renderBlocksColumn(cIdx);
+                document.getElementById(`label-${cIdx}`).innerText = `X1.0`;
+                updateUI();
+            } else {
+                alert("Сначала сломайте хотя бы один блок сверху, чтобы зарядить этот сундук множителями!");
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('balance-val').innerText = balance;
+            
+            slotEls.forEach((slot, idx) => {
+                const item = playerInventory[idx];
+                if (item) {
+                    slot.innerHTML = `${item.emoji}<span class="slot-dur">${item.dur}⚡</span>`;
+                } else {
+                    slot.innerHTML = '';
+                }
+
+                if (idx === selectedPickaxeIdx) {
+                    slot.classList.add('selected');
+                } else {
+                    slot.classList.remove('selected');
+                }
+            });
+
+            spinBtn.disabled = balance < 20 || isSpinning;
+        }
+
+        slotEls.forEach(slot => {
+            slot.addEventListener('click', () => {
+                const idx = parseInt(slot.dataset.idx);
+                if (playerInventory[idx]) {
+                    selectedPickaxeIdx = idx;
+                } else {
+                    selectedPickaxeIdx = -1;
+                }
+                updateUI();
+            });
+        });
+
+        spinBtn.onclick = () => {
+            if (balance < 20 || isSpinning) return;
+            balance -= 20;
+            isSpinning = true;
+            spinBtn.innerText = "Крутим...";
+            updateUI();
+
+            let ticks = 0;
+            const interval = setInterval(() => {
+                for (let i = 0; i < 5; i++) {
+                    let randPick = pickaxes[Math.floor(Math.random() * pickaxes.length)];
+                    slotEls[i].innerHTML = randPick.emoji;
+                }
+                ticks++;
+                if (ticks > 10) {
+                    clearInterval(interval);
+                    
+                    playerInventory = Array.from({ length: 5 }, () => {
+                        let randPick = pickaxes[Math.floor(Math.random() * pickaxes.length)];
+                        return { ...randPick, dur: randPick.maxDur };
+                    });
+
+                    isSpinning = false;
+                    spinBtn.innerText = "КРУТИТЬ (20 💰)";
+                    selectedPickaxeIdx = 0;
+                    updateUI();
+                }
+            }, 100);
+        };
+
+        freeBtn.onclick = () => {
+            freeBtn.disabled = true;
+            let secondsLeft = 5;
+            freeBtn.innerText = `Ждите ${secondsLeft} сек...`;
+
+            const timer = setInterval(() => {
+                secondsLeft--;
+                if (secondsLeft <= 0) {
+                    clearInterval(timer);
+                    balance += 100;
+                    freeBtn.disabled = false;
+                    freeBtn.innerText = "Получить +100 монеток";
+                    updateUI();
+                } else {
+                    freeBtn.innerText = `Ждите ${secondsLeft} сек...`;
+                }
+            }, 1000);
+        };
+
+        initWorld();
+    </script>
+</body>
+</html>
+
+        

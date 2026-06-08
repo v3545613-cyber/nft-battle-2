@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мой Игровой Лаунчер</title>
+    <style>
+        body {
+            margin: 0; padding: 0;
+            background-color: #0b0f17;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #c9d1d9;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            min-height: 100vh; user-select: none;
+        }
+
+        /* Заголовок меню */
+        h1 {
+            font-size: 36px; font-weight: bold; color: #fff;
+            text-transform: uppercase; letter-spacing: 2px;
+            margin-bottom: 10px; text-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+        }
+        .subtitle { font-size: 16px; color: #8b949e; margin-bottom: 40px; }
+
+        /* Сетка игровых карточек */
+        .launcher-grid {
+            display: flex; gap: 25px; flex-wrap: wrap;
+            justify-content: center; max-width: 1000px; width: 90%;
+        }
+
+        /* Стиль самой карточки-ссылки */
+        .game-card {
+            background: #161b22; border: 2px solid #30363d; border-radius: 12px;
+            width: 260px; padding: 25px; text-align: center;
+            text-decoration: none; color: #c9d1d9;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .game-card:hover {
+            transform: translateY(-8px);
+            border-color: #58a6ff;
+            box-shadow: 0 10px 25px rgba(88, 166, 255, 0.25);
+        }
+
+        .game-icon { font-size: 55px; margin-bottom: 15px; }
+        .game-title { font-size: 20px; font-weight: bold; color: #fff; margin-bottom: 8px; }
+        .game-desc { font-size: 13px; color: #8b949e; line-height: 1.4; margin-bottom: 20px; }
+        
+        /* Кнопка запуска */
+        .play-btn {
+            background: #1f6feb; border: none; color: white;
+            padding: 10px 20px; font-size: 14px; font-weight: bold;
+            border-radius: 6px; cursor: pointer; transition: background 0.1s;
+        }
+        .game-card:hover .play-btn { background: #58a6ff; }
+    </style>
+</head>
+<body>
+
+    <h1>Игровой Центр</h1>
+    <div class="subtitle">Выберите проект для запуска:</div>
+
+    <div class="launcher-grid">
+
+        <!-- КАРТОЧКА ИГРЫ 1 -->
+        <a href="my.mini.game..mineckraft.7.0.0.html" class="game-card">
+            <div>
+                <div class="game-icon">🧱</div>
+                <div class="game-title">Minecraft Canvas</div>
+            </div>
+            <div>
+                <p class="game-desc">Облегчённая и супер-стабильная 2D-песочница. Плавные холмы, деревья, залежи руд и Палка-отладка.</p>
+                <button class="play-btn">ИГРАТЬ</button>
+            </div>
+        </a>
+
+        <!-- КАРТОЧКА ИГРЫ 2 -->
+        <a href="my_minigame.kirki.html" class="game-card">
+            <div>
+                <div class="game-icon">🧰</div>
+                <div class="game-title">Сундуки и Кирки</div>
+            </div>
+            <div>
+                <p class="game-desc">Симулятор кейсов с кирками из Майнкрафта. Копите иксы, разрушайте блоки над сундуками и забирайте монеты.</p>
+                <button class="play-btn">ИГРАТЬ</button>
+            </div>
+        </a>
+
+        <!-- КАРТОЧКА ИГРЫ 3 -->
+        <a href="nft.one.html" class="game-card">
+            <div>
+                <div class="game-icon">💎</div>
+                <div class="game-title">NFT Battle</div>
+            </div>
+            <div>
+                <p class="game-desc">Глобальная стратегия: 600 NFT, 65 кейсов, валюта L-Coin, прокачка силы клика, майнинг-фермы и Сейф Страховки.</p>
+                <button class="play-btn">ИГРАТЬ</button>
+            </div>
+        </a>
+
+    </div>
+
+</body>
+</html>

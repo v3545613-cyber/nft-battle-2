@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minecraft 2D: Canvas Stable Lite</title>
+    <style>
+        body { margin: 0; background: #75a7ff; font-family: sans-serif; overflow: hidden; }
+        #ui { position: fixed; top: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); color: #fff; padding: 10px; z-index: 10; display: flex; gap: 10px; align-items: center; box-sizing: border-box; }
+        #mode { background: #d32f2f; border: none; color: #fff; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; }
+        #select { background: #333; color: #fff; border: 1px solid #666; padding: 5px; border-radius: 4px; }
+        #gameCanvas { display: block; cursor: grab; position: absolute; top: 0; left: 0; }
+        #gameCanvas:active { cursor: grabbing; }
+    </style>
+</head>
+<body>
+
+    <div id="ui">
+        <button id="mode">ЛОМАТЬ</button>
+        <select id="select"></select>
+        <span><b>ЛКМ</b> — действие | <b>Колесико / ПКМ</b> — двигать карту</span>
+    </div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const W = 60, H = 30, BS = 32; 
+        let isBuild = false, isLftDown = false, isPanDown = false;
+        let startX, startY, worldX = 0, worldY = 60;
+        let mouseX = 0, mouseY = 0;
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const modeBtn = document.getElementById('mode');
+        const selectEl = document.getElementById('select');
+
+        // Список из 16 стабильных блоков
+        const blocks = {
+            air: { color: 'transparent', name: 'Воздух', hide: true },
+            grass: { color: '#5b8731', name: '🌱 Трава' },
+            dirt: { color: '#866043', name: '🟤 Земля' },
+            stone: { color: '#737373', name: '🪨 Камень' },
+            cobble: { color: '#525252', name: '🧱 Булыжник' },
+            wood: { color: '#a16e45', name: '🪵 Дерево' },
+            leaves: { color: '#386b20', name: '🍃 Листва' },
+            planks: { color: '#b0885d', name: '🪵 Доски' },
+            brick: { color: '#b24a36', name: '🧱 Кирпич' },
+            glass: { color: 'rgba(255,255,255,0.4)', name: '🪟 Стекло' },
+            torch: { color: '#ff9900', name: '🕯️ Факел' },
+            obsidian: { color: '#19132b', name: '🌌 Обсидиан' },
+            lamp: { color: '#fff275', name: '🏮 Лампа' },
+            wool: { color: '#3366cc', name: '🟦 Ковёр' },
+            iron: { color: '#9c8e82', name: '🔩 Железо' },
+            gold: { color: '#cca633', name: '🪙 Золото' },
+            diamond: { color: '#4cc9cc', name: '💎 Алмазы' }
+        };
+
+        const blockKeys = Object.keys(blocks).filter(k => !blocks[k].hide);
+        blockKeys.forEach(k => {
+            const opt = document.createElement('option');
+            opt.value = k; opt.innerText = blocks[k].name;
+            selectEl.appendChild(opt);
+        });
+        const optDebug = document.createElement('option');
+        optDebug.value = 'debug'; optDebug.innerText = '🪄 Палка-отладка';
+        selectEl.appendChild(optDebug);
+
+        const matrix = [];
+        for (let y = 0; y < H; y++) {
+            matrix[y] = [];
+            for (let x = 0; x < W; x++) {
+                let type = 'air';
+                const ground = Math.round(12 + Math.sin(x * 0.15) * 3);
+                if (y > ground) {
+                    type = 'stone';
+                    const rand = Math.random();
+                    if (rand < 0.05) type = (y > H - 5) ? 'diamond' : (y > ground + 8 ? 'gold' : 'iron');
+                    if (rand > 0.96 && y > H - 6) type = 'obsidian';
+                } else if (y === ground) { type = 'grass'; }
+                else if (y > ground - 3 && y < ground) { type = 'dirt'; }
+                matrix[y][x] = type;
+            }
+        }
+
+        for (let x = 4; x < W - 4; x++) {
+            let gy = 0; while (gy < H && matrix[gy][x] === 'air') gy++;
+            if (gy < H && matrix[gy][x] === 'grass' && Math.random() < 0.18 && matrix[gy-1][x-1] !== 'wood' && matrix[gy-1][x-2] !== 'wood') {
+                matrix[gy-1][x] = matrix[gy-2][x] = matrix[gy-3][x] = 'wood';
+                matrix[gy-4][x] = matrix[gy-4][x-1] = matrix[gy-4][x+1] = matrix[gy-5][x] = 'leaves';
+            }
+        }
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            draw();
+        }
+        window.addEventListener('resize', resize);
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(worldX, worldY);
+
+            for (let y = 0; y < H; y++) {
+                for (let x = 0; x < W; x++) {
+                    const type = matrix[y][x];
+                    if (type === 'air') continue;
+
+                    ctx.fillStyle = blocks[type].color;
+                    ctx.fillRect(x * BS, y * BS, BS, BS);
+                    
+                    ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                    ctx.lineWidth = 1;
+                    ctx.strokeRect(x * BS, y * BS, BS, BS);
+
+                    if (type === 'grass') { ctx.fillStyle = '#7cb342'; ctx.fillRect(x * BS, y * BS, BS, 4); }
+                    if (type === 'torch') { ctx.fillStyle = '#fff'; ctx.fillRect(x * BS + 14, y * BS + 6, 4, 4); }
+                }
+            }
+            ctx.restore();
+        }
+
+        function interact() {
+            const gridX = Math.floor((mouseX - worldX) / BS);
+            const gridY = Math.floor((mouseY - worldY) / BS);
+
+            if (gridX < 0 || gridX >= W || gridY < 0 || gridY >= H) return;
+            
+            const currentType = matrix[gridY][gridX];
+            const item = selectEl.value;
+
+            if (item === 'debug') {
+                if (currentType === 'air') return;
+                let nextIdx = (blockKeys.indexOf(currentType) + 1) % blockKeys.length;
+                matrix[gridY][gridX] = blockKeys[nextIdx];
+            } else {
+                if (isBuild) {
+                    if (currentType === 'air' || currentType === 'leaves') matrix[gridY][gridX] = item;
+                } else {
+                    if (currentType !== 'air') matrix[gridY][gridX] = 'air';
+                }
+            }
+            draw();
+        }
+
+        canvas.onmousedown = (e) => {
+            if (e.button === 0) { isLftDown = true; interact(); }
+            if (e.button === 1 || e.button === 2) {
+                isPanDown = true;
+                startX = e.clientX - worldX;
+                startY = e.clientY - worldY;
+                e.preventDefault();
+            }
+        };
+
+        window.onmouseup = (e) => {
+            if (e.button === 0) isLftDown = false;
+            if (e.button === 1 || e.button === 2) isPanDown = false;
+        };
+
+        canvas.onmousemove = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            mouseX = e.clientX - rect.left;
+            mouseY = e.clientY - rect.top;
+
+            if (isPanDown) {
+                worldX = e.clientX - startX;
+                worldY = e.clientY - startY;
+                draw();
+            } else if (isLftDown) {
+                interact();
+            }
+        };
+
+        window.oncontextmenu = (e) => e.preventDefault();
+        modeBtn.onclick = () => {
+            isBuild = !isBuild;
+            modeBtn.innerText = isBuild ? 'СТРОИТЬ' : 'ЛОМАТЬ';
+            modeBtn.style.background = isBuild ? '#4caf50' : '#d32f2f';
+        };
+
+        worldX = window.innerWidth / 2 - (W * BS) / 2;
+        resize();
+    </script>
+</body>
+</html>
